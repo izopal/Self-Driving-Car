@@ -1,4 +1,5 @@
 import InputHandler from './input.js';
+import Sensor from './sensor.js';
 
 
 export default class Car {
@@ -6,8 +7,15 @@ export default class Car {
         //початкові параметри розміщення і розмірів обєкта
         this.x             = x;
         this.y             = y;
-        this.width         = width;
-        this.height        = height;
+        this.size          = 1.5;
+        this.width         = width * this.size ;
+        this.height        = height * this.size ;
+        // підключаємо зображення
+        this.image         = new Image;
+        this.image.src     = `images/auto.png`;
+        // параметри початкового розміру кадру (frame) зображення 
+        this.autoWidth     = 25;
+        this.autoHeight    = 47;
         // підключаємо обєкт керування
         this.input         = new InputHandler;
         // параметри швидкості
@@ -16,13 +24,14 @@ export default class Car {
         this.acceleration  = .2;
         this.friction      = .01;
         this.angel         = 0;
+        this.sensor        = new Sensor (this);
     };
     update(){
 
         this.#move();
         
     };
-    
+
     #move(){
         if(this.input.forward) this.speed += this.acceleration;
         if(this.input.reverse) this.speed -= this.acceleration;
@@ -49,10 +58,21 @@ export default class Car {
             ctx.translate(this.x, this.y);
             ctx.rotate   (-this.angel);
             ctx.beginPath();
-            ctx.rect     (- this.width * .5,
-                        - this.height * .5,
-                        this.width,
-                        this.height);
+            // ctx.rect     (- this.width * .5,
+            //               - this.height * .5,
+            //               this.width,
+            //               this.height);
+            ctx.drawImage ( this.image, 
+                            // параметри кадру, який обераємо
+                            0,
+                            0,
+                            this.autoWidth,
+                            this.autoHeight, 
+                            // параметри кадру, де буде розміщений і які розміри буде мати
+                            - this.width * .5,
+                            - this.height * .5,
+                            this.width,
+                            this.height);
             ctx.fill      ();
         ctx.restore();
     };

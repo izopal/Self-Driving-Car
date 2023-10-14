@@ -13,6 +13,7 @@ export default class InputHandler {
 
     #addKeyboardListeners(){
         body.onkeydown = (event) =>{
+            console.log(event)
             switch(event.key){
                 case 'ArrowLeft':
                     this.left = true;
