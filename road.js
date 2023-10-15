@@ -24,8 +24,6 @@ export default class Road {
             [topLeft,  bottomLeft],
             [topRight, bottomRight],
         ];
-        console.table(this)
-        console.log(this.borders)
     };
     // функція визначення розміщення обєкту по центру полоси
     getLaneCentre(LaneIndex){

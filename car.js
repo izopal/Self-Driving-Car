@@ -1,5 +1,7 @@
-import InputHandler from './input.js';
-import Sensor from './sensor.js';
+import InputHandler     from './input.js';
+import Sensor           from './sensor.js';
+import {polysIntersect} from './utils.js'    
+
 
 
 export default class Car {
@@ -24,13 +26,55 @@ export default class Car {
         this.acceleration  = .2;
         this.friction      = .01;
         this.angel         = 0;
+
+        this.damaged       = false;
+
         this.sensor        = new Sensor (this);
     };
-    update(){
-
-        this.#move();
-        
+   
+    update(roadBorders){
+        if(!this.damaged){
+            this.#move();
+            this.poligon = this.#createPolygon();
+            this.damaged = this.#assessDamage(roadBorders);
+            
+            this.sensor.update(roadBorders);
+        }
     };
+
+    #assessDamage(roadBorders){
+        for(let i = 0; i < roadBorders.length; ++i){
+            if(polysIntersect(roadBorders[i], this.poligon)){
+                return true
+            } 
+        }
+        return false;
+    }
+
+    #createPolygon(){
+        const points = [];
+        const radius = Math.hypot(this.width, this.height) * .5;
+        const alpha  = Math.atan2(this.width, this.height);
+        points.push({ x: this.x - Math.sin(this.angel - alpha) * radius,
+                      y: this.y - Math.cos(this.angel - alpha) * radius
+        });
+              
+        points.push({ x: this.x - Math.sin(this.angel + alpha) * radius,
+                      y: this.y - Math.cos(this.angel + alpha) * radius
+        });
+        
+        points.push({ x: this.x - Math.sin(Math.PI + this.angel - alpha) * radius,
+                      y: this.y - Math.cos(Math.PI + this.angel - alpha) * radius
+        });
+        points.push({ x: this.x - Math.sin(Math.PI + this.angel + alpha) * radius,
+                      y: this.y - Math.cos(Math.PI + this.angel + alpha) * radius
+        });
+        points.push({ x: this.x - Math.sin(this.angel - alpha) * radius,
+            y: this.y - Math.cos(this.angel - alpha) * radius
+        });
+        return points;
+    }
+
 
     #move(){
         if(this.input.forward) this.speed += this.acceleration;
@@ -51,17 +95,15 @@ export default class Car {
 
         this.x -= Math.sin(this.angel) * this.speed;
         this.y -= Math.cos(this.angel) * this.speed;
+      
     };
 
     draw(ctx){
+        this.sensor.draw(ctx);
+        
         ctx.save();
             ctx.translate(this.x, this.y);
             ctx.rotate   (-this.angel);
-            ctx.beginPath();
-            // ctx.rect     (- this.width * .5,
-            //               - this.height * .5,
-            //               this.width,
-            //               this.height);
             ctx.drawImage ( this.image, 
                             // параметри кадру, який обераємо
                             0,
@@ -73,7 +115,16 @@ export default class Car {
                             - this.height * .5,
                             this.width,
                             this.height);
-            ctx.fill      ();
         ctx.restore();
+
+        ctx.beginPath();
+        
+        ctx.strokeStyle = this.damaged ? 'red' : 'blue'
+        // ctx.strokeStyle  = 'red';
+        ctx.moveTo(this.poligon[0].x, this.poligon[0].y);
+        for(let i=0; i < this.poligon.length; ++i){
+            ctx.lineTo(this.poligon[i].x, this.poligon[i].y)
+        };
+        ctx.stroke();
     };
 }
