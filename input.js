@@ -1,19 +1,27 @@
 const body = document.body
 
 export default class InputHandler {
-    constructor(){
+    constructor(type){
         this.forward = false;
         this.left    = false;
         this.right   = false;
         this.reverse = false;
+        this.restar  = false;
 
-        this.#addKeyboardListeners();
+        switch(type){
+            case 'Player':
+                this.#addKeyboardListeners();
+                break;
+            case 'DUMMY':
+                this.forward = true;
+                break;
+        }
     }
 
 
     #addKeyboardListeners(){
         body.onkeydown = (event) =>{
-            console.log(event)
+            // console.log(event)
             switch(event.key){
                 case 'ArrowLeft':
                     this.left = true;
@@ -27,8 +35,11 @@ export default class InputHandler {
                 case 'ArrowDown':
                     this.reverse = true;
                     break;
+                case 'Enter':
+                    this.restar = true;
+                    break;
             }
-            console.table(this);
+            // console.table(this);
         };
 
         body.onkeyup = (event) =>{
@@ -45,8 +56,11 @@ export default class InputHandler {
                 case 'ArrowDown':
                     this.reverse = false;
                     break;
+                case 'Enter':
+                    this.restar = false;
+                    break;
             }
-            console.table(this);
+            // console.table(this);
         }
     }
 }

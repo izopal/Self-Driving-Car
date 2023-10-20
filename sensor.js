@@ -5,30 +5,32 @@ export default class Sensor {
     constructor(car){
         this.car      = car;
         // параметри сенсорів
-        this.rayCount  = 12;               // кількість сенсорів 
+        this.rayCount  = 24;               // кількість сенсорів 
         this.rayLenght = 100;             // дальність роботи сенсорів
-        this.raySpread = Math.PI * 2;   // кут напрямку сенсорів
+        this.raySpread = Math.PI * 2 ;     // кут напрямку сенсорів
 
-        this.rays      = [];
+        this.rays      = [];          
         this.readings  = [];
 
     };
     
 
-    update(roadBorders){
+    update(roadBorders, trafic){
         this.rays      = [];
         this.readings  = [];
-
+        
         this.#castReys();
 
         for (let i = 0; i < this.rays.length; ++i){
             this.readings.push(
-                this.#getReading(this.rays[i], roadBorders)  
+                this.#getReading(this.rays[i], 
+                                 roadBorders, 
+                                 trafic)  
             )
         }
     };
    
-    #getReading(ray, roadBorders){
+    #getReading(ray, roadBorders, trafic){
         let touches = [];
         for( let i = 0; i < roadBorders.length; ++i){
             const touch = getIntersection(
@@ -41,6 +43,17 @@ export default class Sensor {
                             );
             if(touch) touches.push(touch);
         };
+
+        for(let i = 0; i < trafic.length; ++i){
+            const poly = trafic[i].poligon;
+            for(let j = 0; j < poly.length; ++j){
+                const value = getIntersection(ray[0],                      // координата промення start;
+                                              ray[1],                      // координата промення end 
+                                              poly[j],
+                                              poly[(j + 1) % poly.length]);
+            if(value) touches.push(value);
+            }
+        }
 
 
         if(touches.length === 0) {
@@ -74,21 +87,19 @@ export default class Sensor {
                 end = this.readings[i];
             }
             ctx.beginPath();
-            ctx.lineWidth   = 2;
-            ctx.strokeStyle = 'yellow';
-            ctx.moveTo(this.rays[i][0].x,
-                       this.rays[i][0].y);
-            ctx.lineTo(end.x,
-                       end.y);
+                ctx.lineWidth   = 2;
+                ctx.strokeStyle = 'yellow';
+                ctx.moveTo(this.rays[i][0].x,
+                           this.rays[i][0].y);
+                ctx.lineTo(end.x, end.y);
             ctx.stroke();
 
             ctx.beginPath();
-            ctx.lineWidth   = 2;
-            ctx.strokeStyle = 'black';
-            ctx.moveTo(this.rays[i][1].x,
-                       this.rays[i][1].y);
-            ctx.lineTo(end.x,
-                       end.y);
+                ctx.lineWidth   = 2;
+                ctx.strokeStyle = 'red';
+                ctx.moveTo(this.rays[i][1].x,
+                           this.rays[i][1].y);
+                ctx.lineTo(end.x, end.y);
             ctx.stroke();
         };
     }
